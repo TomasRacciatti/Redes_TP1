@@ -15,7 +15,8 @@ public class PlayerController : NetworkBehaviour
 
     public bool IsAlive => RemainingDice > 0;
     
-    [Networked] public int myTurnId { get; set; }
+    [Networked, OnChangedRender(nameof(OnTurnIdChanged))] 
+    public int myTurnId { get; set; }
     
 
     public override void Spawned()
@@ -29,11 +30,35 @@ public class PlayerController : NetworkBehaviour
 
         if (HasStateAuthority)
         {
-            Debug.Log($"[PlayerController] I am the local player. My NetworkObject ID: {Object.Id}");
-            Debug.Log($"[PlayerController] My TurnID is: {myTurnId}");
+            //Debug.Log($"[PlayerController] I am the local player. My NetworkObject ID: {Object.Id}");
             UIManager.Instance.SetPlayerReference(this);
         }
         GameManager.Instance.RegisterPlayer(this);
+    }
+    
+    public override void FixedUpdateNetwork() // Para testear si cambia de turno
+    {
+        if (HasInputAuthority && Input.GetKeyDown(KeyCode.Space))
+        {
+            if (myTurnId == GameManager.Instance.currentTurnId)
+            {
+                Debug.Log("[PlayerController] Space pressed — requesting next turn.");
+                GameManager.Instance.NextTurn();
+            }
+            else
+            {
+                Debug.Log("[PlayerController] Not my turn. Ignoring space.");
+            }
+        }
+    }
+
+    private void OnTurnIdChanged()
+    {
+        Debug.Log($"[PlayerController] My TurnID is: {myTurnId}");
+        if (HasInputAuthority)
+        {
+            UIManager.Instance?.UpdateTurnIndicator();
+        }
     }
 
     public void RollDice()

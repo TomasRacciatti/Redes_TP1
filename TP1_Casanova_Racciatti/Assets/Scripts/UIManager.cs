@@ -49,16 +49,16 @@ public class UIManager : MonoBehaviour
 
     public void UpdateTurnIndicator()
     {
-        int myId = _localPlayer.myTurnId;
-        int currentId = GameManager.Instance.currentTurnId;
+        if (_localPlayer == null) return;
 
-        bool isMyTurn = myId == currentId;
+        bool isMyTurn = _localPlayer.myTurnId == GameManager.Instance.currentTurnId;
 
-        Debug.Log($"[UIManager] MyTurnId: {myId}, CurrentTurnId: {currentId}, IsMyTurn: {isMyTurn}");
+        Debug.Log($"[UIManager] MyTurnId: {_localPlayer.myTurnId}, CurrentTurnId: {GameManager.Instance.currentTurnId}, IsMyTurn: {isMyTurn}");
 
         _turnOverlay.SetActive(!isMyTurn);
         _actionButtons.SetActive(isMyTurn);
-        _turnText.text = $"Player {currentId}'s turn";
+
+        _turnText.text = $"Player {GameManager.Instance.currentTurnId}'s turn";
     }
 
     public void UpdateDiceCounts(List<PlayerController> players)

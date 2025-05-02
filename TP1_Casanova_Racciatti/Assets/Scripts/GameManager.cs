@@ -31,8 +31,7 @@ public class GameManager : NetworkBehaviour
         if (!_players.Contains(player))
         {
             _players.Add(player);
-            player.myTurnId = _players.Count;
-            Debug.Log($"[GameManager] Assigned TurnId {player.myTurnId} to player {player.Object.InputAuthority}");
+            Debug.Log($"[GameManager] Registered player {player.Object.InputAuthority}");
         }
 
         TryStartGame();
@@ -48,10 +47,21 @@ public class GameManager : NetworkBehaviour
             Runner.StartCoroutine(DelayedStart());
         }
     }
+    
+    private void AssignTurnIDs()
+    {
+        int id = 1;
+        foreach (var player in _players)
+        {
+            player.myTurnId = id++;
+        }
+    }
 
     private IEnumerator DelayedStart()
     {
-        yield return null; 
+        yield return null;
+
+        AssignTurnIDs();
         StartGame();
     }
 
@@ -70,6 +80,13 @@ public class GameManager : NetworkBehaviour
         {
             player.RollDice();
         }
+
+        Runner.StartCoroutine(DelayedUIUpdate());
+    }
+    
+    private IEnumerator DelayedUIUpdate()
+    {
+        yield return new WaitForSeconds(0.1f);
 
         UpdateUI();
     }
