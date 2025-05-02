@@ -15,6 +15,8 @@ public class PlayerController : NetworkBehaviour
 
     public bool IsAlive => RemainingDice > 0;
     
+    [Networked] public int myTurnId { get; set; }
+    
 
     public override void Spawned()
     {
@@ -28,6 +30,7 @@ public class PlayerController : NetworkBehaviour
         if (HasStateAuthority)
         {
             Debug.Log($"[PlayerController] I am the local player. My NetworkObject ID: {Object.Id}");
+            Debug.Log($"[PlayerController] My TurnID is: {myTurnId}");
             UIManager.Instance.SetPlayerReference(this);
         }
         GameManager.Instance.RegisterPlayer(this);

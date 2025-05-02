@@ -47,27 +47,27 @@ public class UIManager : MonoBehaviour
         _claimAmountText.text = quantity.ToString();
     }
 
-    public void UpdateTurnIndicator(PlayerController currentPlayer)
+    public void UpdateTurnIndicator()
     {
-        bool isMyTurn = currentPlayer == _localPlayer;
-        
-        Debug.Log($"[UIManager] Local: {_localPlayer?.Object.Id}, Current: {currentPlayer?.Object.Id}, IsMyTurn: {isMyTurn}");
-        
+        int myId = _localPlayer.myTurnId;
+        int currentId = GameManager.Instance.currentTurnId;
+
+        bool isMyTurn = myId == currentId;
+
+        Debug.Log($"[UIManager] MyTurnId: {myId}, CurrentTurnId: {currentId}, IsMyTurn: {isMyTurn}");
+
         _turnOverlay.SetActive(!isMyTurn);
         _actionButtons.SetActive(isMyTurn);
-        
-        _turnText.text = $"Player{GameManager.Instance.GetPlayerIndex(currentPlayer) + 1}'s turn";
+        _turnText.text = $"Player {currentId}'s turn";
     }
 
-    public void UpdateDiceCounts(Dictionary<PlayerRef, PlayerController> players)
+    public void UpdateDiceCounts(List<PlayerController> players)
     {
         _playerListText.text = "";
 
-        int i = 1;
-        foreach (var pair in players)
+        for (int i = 0; i < players.Count; i++)
         {
-            _playerListText.text += $"Player{i}: {pair.Value.RemainingDice}\n";
-            i++;
+            _playerListText.text += $"Player{i + 1}: {players[i].RemainingDice}\n";
         }
     }
     
