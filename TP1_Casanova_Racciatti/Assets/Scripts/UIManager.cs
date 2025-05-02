@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using Fusion;
 
 public class UIManager : MonoBehaviour
 {
@@ -50,19 +51,23 @@ public class UIManager : MonoBehaviour
     {
         bool isMyTurn = currentPlayer == _localPlayer;
         
+        Debug.Log($"[UIManager] Local: {_localPlayer?.Object.Id}, Current: {currentPlayer?.Object.Id}, IsMyTurn: {isMyTurn}");
+        
         _turnOverlay.SetActive(!isMyTurn);
         _actionButtons.SetActive(isMyTurn);
         
         _turnText.text = $"Player{GameManager.Instance.GetPlayerIndex(currentPlayer) + 1}'s turn";
     }
 
-    public void UpdateDiceCounts(List<PlayerController> players)
+    public void UpdateDiceCounts(Dictionary<PlayerRef, PlayerController> players)
     {
         _playerListText.text = "";
-        
-        for (int i = 0; i < players.Count; i++)
+
+        int i = 1;
+        foreach (var pair in players)
         {
-            _playerListText.text += $"Player{i + 1}: {players[i].RemainingDice}\n";
+            _playerListText.text += $"Player{i}: {pair.Value.RemainingDice}\n";
+            i++;
         }
     }
     

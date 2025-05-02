@@ -27,7 +27,7 @@ public class PlayerController : NetworkBehaviour
 
         if (HasStateAuthority)
         {
-            Debug.Log($"[Player] I have InputAuthority. My NetworkId: {Object.Id}");
+            Debug.Log($"[PlayerController] I am the local player. My NetworkObject ID: {Object.Id}");
             UIManager.Instance.SetPlayerReference(this);
         }
         GameManager.Instance.RegisterPlayer(this);

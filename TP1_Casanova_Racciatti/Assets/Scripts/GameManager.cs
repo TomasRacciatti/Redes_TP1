@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Fusion;
+using System.Linq;
 
 public class GameManager : NetworkBehaviour
 {
@@ -10,9 +11,9 @@ public class GameManager : NetworkBehaviour
 
     [Networked] public int currentClaimQuantity { get; set; }
     [Networked] public int currentClaimFace { get; set; }
-    [Networked] public int currentTurnIndex { get; set; }
+    [Networked] private PlayerRef currentTurnPlayer { get; set; }
 
-    private List<PlayerController> _players = new List<PlayerController>();
+    private Dictionary<PlayerRef, PlayerController> _players = new();
     private bool _gameStarted;
 
     private void Awake()
@@ -26,9 +27,11 @@ public class GameManager : NetworkBehaviour
 
     public void RegisterPlayer(PlayerController player)
     {
-        if (!_players.Contains(player))
+        var playerRef = player.Object.InputAuthority;
+        
+        if (!_players.ContainsKey(playerRef))
         {
-            _players.Add(player);
+            _players.Add(playerRef, player);
         }
 
         TryStartGame();
@@ -41,8 +44,15 @@ public class GameManager : NetworkBehaviour
         if (_players.Count >= 2)
         {
             _gameStarted = true;
-            StartGame();
+            Runner.StartCoroutine(DelayedStart());
         }
+    }
+
+    private IEnumerator DelayedStart()
+    {
+        yield return null; 
+
+        StartGame();
     }
 
     private void StartGame()
@@ -52,9 +62,10 @@ public class GameManager : NetworkBehaviour
         currentClaimQuantity = 0;
         currentClaimFace = 1;
         
-        currentTurnIndex = UnityEngine.Random.Range(0, _players.Count);
+        var alive = _players.Keys.ToList();
+        currentTurnPlayer = alive[UnityEngine.Random.Range(0, alive.Count)];
 
-        foreach (var player in _players)
+        foreach (var player in _players.Values)
         {
            player.RollDice(); 
         }
@@ -64,22 +75,35 @@ public class GameManager : NetworkBehaviour
 
     public void NextTurn()
     {
-        do
-        {
-            currentTurnIndex = (currentTurnIndex + 1) % _players.Count;
-        } while (!_players[currentTurnIndex].IsAlive);
+        var alivePlayers = _players
+            .Where(pair => pair.Value.IsAlive)
+            .Select(pair => pair.Key)
+            .ToList();
 
+        int currentIndex = alivePlayers.IndexOf(currentTurnPlayer);
+        int nextIndex = (currentIndex + 1) % alivePlayers.Count;
+
+        currentTurnPlayer = alivePlayers[nextIndex];
         UpdateUI();
     }
 
     public int GetPlayerIndex(PlayerController player)
     {
-        return _players.IndexOf(player);
+        int index = 0;
+        foreach (var entry in _players)
+        {
+            if (entry.Value == player)
+                return index;
+
+            index++;
+        }
+
+        return -1; 
     }
     
     public PlayerController GetCurrentPlayer()
     {
-        return _players[currentTurnIndex];
+        return _players.TryGetValue(currentTurnPlayer, out var player) ? player : null;
     }
 
     private void UpdateUI()
@@ -102,7 +126,7 @@ public class GameManager : NetworkBehaviour
     {
         Dictionary<int, int> distribution = new Dictionary<int, int>();
 
-        foreach (var player in _players)
+        foreach (var player in _players.Values)
         {
             if (!player.IsAlive) continue;
 
