@@ -27,6 +27,7 @@ public class PlayerController : NetworkBehaviour
 
         if (HasStateAuthority)
         {
+            Debug.Log($"[Player] I have InputAuthority. My NetworkId: {Object.Id}");
             UIManager.Instance.SetPlayerReference(this);
         }
         GameManager.Instance.RegisterPlayer(this);
@@ -39,10 +40,15 @@ public class PlayerController : NetworkBehaviour
         {
             RolledDice.Add(UnityEngine.Random.Range(1, 7));
         }
+        
+        if (HasInputAuthority)
+            UIManager.Instance.UpdateRolledDice(RolledDice);
     }
     
     public void LoseOneDie()
     {
         RemainingDice--;
+        
+        // Agregar logica de desactivar los dados
     }
 }

@@ -64,3 +64,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b11697a8ad7e28447861f98eff4aac36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _maxDice: 5
+  _RemainingDice: 5

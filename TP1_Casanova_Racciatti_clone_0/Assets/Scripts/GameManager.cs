@@ -87,6 +87,7 @@ public class GameManager : NetworkBehaviour
         UIManager.Instance.UpdateTurnIndicator(GetCurrentPlayer());
         UIManager.Instance.UpdateClaim(currentClaimQuantity, currentClaimFace);
         UIManager.Instance.UpdateDiceCounts(_players);
+        UIManager.Instance.UpdateCurrentClaimDie(currentClaimFace);
     }
     
     public void SetClaim(int quantity, int face)
@@ -95,5 +96,25 @@ public class GameManager : NetworkBehaviour
         currentClaimFace = face;
         UpdateUI();
         NextTurn();
+    }
+    
+    private Dictionary<int, int> GetDiceDistribution()
+    {
+        Dictionary<int, int> distribution = new Dictionary<int, int>();
+
+        foreach (var player in _players)
+        {
+            if (!player.IsAlive) continue;
+
+            foreach (int face in player.RolledDice)
+            {
+                if (!distribution.ContainsKey(face))
+                    distribution[face] = 0;
+
+                distribution[face]++;
+            }
+        }
+
+        return distribution;
     }
 }

@@ -8,6 +8,13 @@ public class UIManager : MonoBehaviour
 {
     public static UIManager Instance { get; private set; }
     
+    [Header("Player Dice UI")]
+    [SerializeField] private List<DieDisplay> _rolledDiceDisplays;
+
+    [Header("Claim Dice UI")]
+    [SerializeField] private DieDisplay _currentClaimDie;
+    [SerializeField] private DieDisplay _raiseClaimDie;
+    
     [Header("Claim")]
     [SerializeField] private TextMeshProUGUI _claimAmountText;
     [SerializeField] private DieDisplay _claimDie;
@@ -57,5 +64,24 @@ public class UIManager : MonoBehaviour
         {
             _playerListText.text += $"Player{i + 1}: {players[i].RemainingDice}\n";
         }
+    }
+    
+    public void UpdateRolledDice(List<int> rolledValues)
+    {
+        for (int i = 0; i < _rolledDiceDisplays.Count; i++)
+        {
+            if (i < rolledValues.Count)
+                _rolledDiceDisplays[i].ShowValue(rolledValues[i]);
+        }
+    }
+
+    public void UpdateCurrentClaimDie(int value)
+    {
+        _currentClaimDie.ShowValue(value);
+    }
+
+    public void UpdateRaiseClaimDie(int value)
+    {
+        _raiseClaimDie.ShowValue(value);
     }
 }

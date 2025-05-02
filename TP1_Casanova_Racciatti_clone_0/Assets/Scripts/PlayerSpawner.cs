@@ -11,21 +11,19 @@ public class PlayerSpawner : SimulationBehaviour, IPlayerJoined
     
     public void PlayerJoined(PlayerRef player)
     {
+        //Debug.Log($"[Spawner] PlayerJoined: {player} | Local: {Runner.LocalPlayer}");
         if (_hasSpawned)
-            return;
-
-        if (player != Runner.LocalPlayer)
-            return;
-
-        if (Runner.SessionInfo.PlayerCount < 2)
         {
-            Debug.Log("Waiting for more players");
+            //Debug.Log("[Spawner] Already spawned.");
             return;
         }
 
-        Runner.Spawn(_playerPrefab, Vector3.zero, Quaternion.identity, inputAuthority: Runner.LocalPlayer);
-        _hasSpawned = true;
-        
-        Debug.Log("Player spawned");
+        if (player == Runner.LocalPlayer)
+        {
+            //Debug.Log("[Spawner] Spawning local player.");
+            
+            Runner.Spawn(_playerPrefab, Vector3.zero, Quaternion.identity, inputAuthority: Runner.LocalPlayer);
+            _hasSpawned = true;
+        }
     }
 }
