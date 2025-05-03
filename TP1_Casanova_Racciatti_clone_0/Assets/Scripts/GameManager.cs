@@ -14,9 +14,13 @@ public class GameManager : NetworkBehaviour
     
     public PlayerRef turnAuthority { get; set; }
     public int currentTurnId { get; set; }
-
+    
+    private int _lastTurnID;
+    private PlayerController LastPlayer => _players.First(p => p.myTurnId == _lastTurnID);
+    
     private List<PlayerController> _players = new List<PlayerController>();
 
+    private bool _isFirstTurn;
     private bool _gameStarted;
 
     private void Awake()
@@ -80,10 +84,11 @@ public class GameManager : NetworkBehaviour
         }
     }
 
-    private void StartGame(PlayerRef firstAuthority, int firstTurnId)
+    private void StartRound(PlayerRef firstAuthority, int firstTurnId)
     {
-        Debug.Log("Game started!");
+        Debug.Log("Round started!");
 
+        _isFirstTurn = true;
         currentClaimQuantity = 0;
         currentClaimFace = 1;
 
@@ -94,16 +99,14 @@ public class GameManager : NetworkBehaviour
         {
             player.RollDice();
         }
-
-        //Runner.StartCoroutine(DelayedUIUpdate());
+        
         UpdateUI();
     }
     
     [Rpc(RpcSources.All, RpcTargets.All)]
     private void RPC_StartGame(PlayerRef firstAuthority, int firstTurnId)
     {
-        // every peer (editor, clone, mobile) now runs the same StartGame()
-        StartGame(firstAuthority, firstTurnId);
+        StartRound(firstAuthority, firstTurnId);
     }
     
     public void RequestNextTurn()
@@ -146,8 +149,30 @@ public class GameManager : NetworkBehaviour
     {
         currentClaimQuantity = quantity;
         currentClaimFace = face;
-        UpdateUI();
+        _lastTurnID = currentTurnId;
+        
         RequestNextTurn();
+    }
+
+    public void CallBluff() // Lo llamamos en el boton
+    {
+        RPC_ResolveBluff();
+    }
+    
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    private void RPC_ResolveBluff()
+    {
+        var dist = GetDiceDistribution();
+        dist.TryGetValue(currentClaimFace, out int actualCount);
+        
+        var caller   = _players.First(p => p.myTurnId == currentTurnId);
+        var claimant = LastPlayer;
+        
+        bool honest = actualCount >= currentClaimQuantity;
+        var loser = honest ? caller : claimant;
+        loser.LoseOneDie();
+        
+        RPC_StartGame(loser.Object.InputAuthority, loser.myTurnId);
     }
 
     private Dictionary<int, int> GetDiceDistribution()
