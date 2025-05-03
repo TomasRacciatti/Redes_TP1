@@ -63,28 +63,47 @@ public class GameManager : NetworkBehaviour
         yield return null;
 
         AssignTurnIDs();
-        StartGame();
+        
+        var championRaw = _players
+            .Min(p => p.Object.InputAuthority.RawEncoded);
+
+        if (Runner.LocalPlayer.RawEncoded == championRaw)
+        {
+            var alive = _players.Where(p => p.IsAlive)
+                .OrderBy(p => p.Object.InputAuthority.RawEncoded)
+                .ToList();
+
+            int idx   = UnityEngine.Random.Range(0, alive.Count);
+            var first = alive[idx];
+            
+            RPC_StartGame(first.Object.InputAuthority, first.myTurnId);
+        }
     }
 
-    private void StartGame()
+    private void StartGame(PlayerRef firstAuthority, int firstTurnId)
     {
         Debug.Log("Game started!");
 
         currentClaimQuantity = 0;
         currentClaimFace = 1;
 
-        var alive = _players.Where(p => p.IsAlive).ToList();
-        var first = alive[UnityEngine.Random.Range(0, alive.Count)];
-        
-        turnAuthority  = first.Object.InputAuthority;
-        currentTurnId  = first.myTurnId;
+        turnAuthority  = firstAuthority;
+        currentTurnId  = firstTurnId;
 
         foreach (var player in _players)
         {
             player.RollDice();
         }
 
-        Runner.StartCoroutine(DelayedUIUpdate());
+        //Runner.StartCoroutine(DelayedUIUpdate());
+        UpdateUI();
+    }
+    
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    private void RPC_StartGame(PlayerRef firstAuthority, int firstTurnId)
+    {
+        // every peer (editor, clone, mobile) now runs the same StartGame()
+        StartGame(firstAuthority, firstTurnId);
     }
 
     private IEnumerator DelayedUIUpdate()
