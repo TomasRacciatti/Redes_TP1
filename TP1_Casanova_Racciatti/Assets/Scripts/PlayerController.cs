@@ -28,7 +28,7 @@ public class PlayerController : NetworkBehaviour
         
         RemainingDice = _maxDice;
 
-        if (HasStateAuthority)
+        if (HasInputAuthority)
         {
             //Debug.Log($"[PlayerController] I am the local player. My NetworkObject ID: {Object.Id}");
             UIManager.Instance.SetPlayerReference(this);
@@ -36,14 +36,14 @@ public class PlayerController : NetworkBehaviour
         GameManager.Instance.RegisterPlayer(this);
     }
     
-    public override void FixedUpdateNetwork() // Para testear si cambia de turno
+    private void Update() // Para testear si cambia de turno
     {
         if (HasInputAuthority && Input.GetKeyDown(KeyCode.Space))
         {
             if (myTurnId == GameManager.Instance.currentTurnId)
             {
                 Debug.Log("[PlayerController] Space pressed — requesting next turn.");
-                GameManager.Instance.NextTurn();
+                GameManager.Instance.RequestNextTurn();
             }
             else
             {

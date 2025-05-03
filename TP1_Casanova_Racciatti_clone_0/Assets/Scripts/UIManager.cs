@@ -40,6 +40,7 @@ public class UIManager : MonoBehaviour
     public void SetPlayerReference(PlayerController player)
     {
         _localPlayer = player;
+        Debug.Log($"[UIManager] Local player set to turnId={player.myTurnId}");
     }
     
     public void UpdateClaim(int quantity, int face)
