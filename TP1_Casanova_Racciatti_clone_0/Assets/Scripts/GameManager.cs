@@ -13,7 +13,7 @@ public class GameManager : NetworkBehaviour
     [Networked] public int currentClaimFace { get; set; }
     
     public PlayerRef turnAuthority { get; set; }
-    [Networked] public int currentTurnId { get; set; }
+    public int currentTurnId { get; set; }
 
     private List<PlayerController> _players = new List<PlayerController>();
 
@@ -33,7 +33,7 @@ public class GameManager : NetworkBehaviour
         if (!_players.Contains(player))
         {
             _players.Add(player);
-            Debug.Log($"[GameManager] Registered player {player.Object.InputAuthority}");
+            //Debug.Log($"[GameManager] Registered player {player.Object.InputAuthority}");
         }
 
         TryStartGame();
@@ -105,18 +105,6 @@ public class GameManager : NetworkBehaviour
         // every peer (editor, clone, mobile) now runs the same StartGame()
         StartGame(firstAuthority, firstTurnId);
     }
-
-    private IEnumerator DelayedUIUpdate()
-    {
-        yield return new WaitForSeconds(0.1f);
-
-        UpdateUI();
-    }
-
-    private void OnTurnAuthorityChanged() // No deberia usar RCP?
-    {
-        UIManager.Instance.UpdateTurnIndicator();
-    }
     
     public void RequestNextTurn()
     {
@@ -129,6 +117,8 @@ public class GameManager : NetworkBehaviour
     [Rpc(RpcSources.All, RpcTargets.All)]
     private void RPC_AdvanceTurn()
     {
+        //Debug.Log($"[RPC_AdvanceTurn] invoked on {Runner.LocalPlayer} — old turn: {currentTurnId}");
+
         var alive = _players
             .Where(p => p.IsAlive)
             .OrderBy(p => p.Object.InputAuthority.RawEncoded)
@@ -143,28 +133,6 @@ public class GameManager : NetworkBehaviour
         
         UpdateUI();
     }
-    
-    /*
-    public void NextTurn()
-    {
-        if (Runner.LocalPlayer != turnAuthority)
-            return;
-
-        var alive = _players
-            .Where(p => p.IsAlive)
-            .OrderBy(p => p.Object.InputAuthority.RawEncoded)
-            .ToList();
-
-        int idx      = alive.FindIndex(p => p.myTurnId == currentTurnId);
-        int nextIdx  = (idx + 1) % alive.Count;
-        var next     = alive[nextIdx];
-
-        turnAuthority  = next.Object.InputAuthority;
-        currentTurnId  = next.myTurnId;
-        
-        UpdateUI();
-    }
-    */
 
     private void UpdateUI()
     {
