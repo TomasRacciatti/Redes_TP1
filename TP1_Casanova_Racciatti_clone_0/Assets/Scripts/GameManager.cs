@@ -144,8 +144,9 @@ public class GameManager : NetworkBehaviour
         UIManager.Instance.UpdateDiceCounts(_players);
         UIManager.Instance.UpdateCurrentClaimDie(currentClaimFace);
     }
-
-    public void SetClaim(int quantity, int face)
+    
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    public void RPC_SetClaim(int quantity, int face)
     {
         currentClaimQuantity = quantity;
         currentClaimFace = face;

@@ -75,8 +75,10 @@ public class PlayerController : NetworkBehaviour
     
     public void LoseOneDie()
     {
-        RemainingDice--;
+        if (RemainingDice > 0)
+            RemainingDice--;
         
-        // Agregar logica de desactivar los dados
+        if (RolledDice.Count > RemainingDice)
+            RolledDice.RemoveAt(RolledDice.Count - 1);
     }
 }

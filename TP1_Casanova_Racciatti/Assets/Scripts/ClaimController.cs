@@ -53,14 +53,14 @@ public class ClaimController : MonoBehaviour
     {
         if (_amount > GameManager.Instance.currentClaimQuantity)
         {
-            GameManager.Instance.SetClaim(_amount, _face);
+            GameManager.Instance.RPC_SetClaim(_amount, _face);
             gameObject.SetActive(false);
         }
         else if (_amount == GameManager.Instance.currentClaimQuantity)
         {
             if (_face > GameManager.Instance.currentClaimFace)
             {
-                GameManager.Instance.SetClaim(_amount, _face);
+                GameManager.Instance.RPC_SetClaim(_amount, _face);
                 gameObject.SetActive(false);
             }
         }
