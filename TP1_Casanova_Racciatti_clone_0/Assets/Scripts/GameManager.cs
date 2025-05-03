@@ -99,7 +99,7 @@ public class GameManager : NetworkBehaviour
         UpdateUI();
     }
     
-    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    [Rpc(RpcSources.All, RpcTargets.All)]
     private void RPC_StartGame(PlayerRef firstAuthority, int firstTurnId)
     {
         // every peer (editor, clone, mobile) now runs the same StartGame()
@@ -126,7 +126,7 @@ public class GameManager : NetworkBehaviour
         RPC_AdvanceTurn();
     }
     
-    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    [Rpc(RpcSources.All, RpcTargets.All)]
     private void RPC_AdvanceTurn()
     {
         var alive = _players
