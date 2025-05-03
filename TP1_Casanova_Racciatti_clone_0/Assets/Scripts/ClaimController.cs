@@ -14,7 +14,7 @@ public class ClaimController : MonoBehaviour
     private int _amount = 0;
     private int _face = 1;
 
-    private const int MinAmount = 0;
+    private const int MinAmount = 1;
     private const int MaxAmount = 30;
     private const int MinFace = 1;
     private const int MaxFace = 6;
@@ -51,7 +51,22 @@ public class ClaimController : MonoBehaviour
     
     public void SubmitClaim()
     {
-        GameManager.Instance.SetClaim(_amount, _face);
+        if (_amount > GameManager.Instance.currentClaimQuantity)
+        {
+            GameManager.Instance.SetClaim(_amount, _face);
+            gameObject.SetActive(false);
+        }
+        else if (_amount == GameManager.Instance.currentClaimQuantity)
+        {
+            if (_face > GameManager.Instance.currentClaimFace)
+            {
+                GameManager.Instance.SetClaim(_amount, _face);
+                gameObject.SetActive(false);
+            }
+        }
+        else
+            Debug.Log("Invalid claim.");
+        
     }
 
     private void UpdateDisplay()
