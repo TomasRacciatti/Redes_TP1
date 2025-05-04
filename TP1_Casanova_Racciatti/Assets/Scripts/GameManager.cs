@@ -100,6 +100,7 @@ public class GameManager : NetworkBehaviour
             player.RollDice();
         }
         
+        UIManager.Instance.UpdateDiceCounts(_players);
         UpdateUI();
     }
     
@@ -141,8 +142,7 @@ public class GameManager : NetworkBehaviour
     {
         UIManager.Instance.UpdateTurnIndicator();
         UIManager.Instance.UpdateClaim(currentClaimQuantity, currentClaimFace);
-        UIManager.Instance.UpdateDiceCounts(_players);
-        UIManager.Instance.UpdateCurrentClaimDie(currentClaimFace);
+        //UIManager.Instance.UpdateDiceCounts(_players);
     }
     
     [Rpc(RpcSources.All, RpcTargets.All)]

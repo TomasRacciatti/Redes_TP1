@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
-using Fusion;
+using System.Linq;
 
 public class UIManager : MonoBehaviour
 {
@@ -14,7 +14,7 @@ public class UIManager : MonoBehaviour
 
     [Header("Claim Dice UI")]
     [SerializeField] private DieDisplay _currentClaimDie;
-    [SerializeField] private DieDisplay _raiseClaimDie;
+    //[SerializeField] private DieDisplay _raiseClaimDie;
     
     [Header("Claim")]
     [SerializeField] private TextMeshProUGUI _claimAmountText;
@@ -46,6 +46,7 @@ public class UIManager : MonoBehaviour
     public void UpdateClaim(int quantity, int face)
     {
         _claimAmountText.text = quantity.ToString();
+        _currentClaimDie.ShowValue(face);
     }
 
     public void UpdateTurnIndicator()
@@ -65,6 +66,8 @@ public class UIManager : MonoBehaviour
     public void UpdateDiceCounts(List<PlayerController> players)
     {
         _playerListText.text = "";
+        
+        //var ordered = players.OrderBy(p => p.myTurnId);
 
         for (int i = 0; i < players.Count; i++)
         {
@@ -83,15 +86,5 @@ public class UIManager : MonoBehaviour
             if (slotActive)
                 _rolledDiceDisplays[i].ShowValue(rolledValues[i]);
         }
-    }
-
-    public void UpdateCurrentClaimDie(int value)
-    {
-        _currentClaimDie.ShowValue(value);
-    }
-
-    public void UpdateRaiseClaimDie(int value)
-    {
-        _raiseClaimDie.ShowValue(value);
     }
 }
