@@ -64,14 +64,25 @@ public class PlayerController : NetworkBehaviour
 
     public void RollDice()
     {
+        if (!HasInputAuthority)
+            return;
+        
         RolledDice.Clear();
         for (int i = 0; i < RemainingDice; i++)
         {
             RolledDice.Add(UnityEngine.Random.Range(1, 7));
         }
+        
+        RPC_SyncRolledDice(RolledDice.ToArray());
 
         if (HasInputAuthority)
             UIManager.Instance.UpdateRolledDice(RolledDice);
+    }
+    
+    [Rpc(RpcSources.InputAuthority, RpcTargets.Proxies)]
+    private void RPC_SyncRolledDice(int[] diceValues)
+    {
+        RolledDice = new List<int>(diceValues);
     }
 
     public void LoseOneDie()

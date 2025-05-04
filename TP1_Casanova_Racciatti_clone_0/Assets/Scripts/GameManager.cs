@@ -192,6 +192,12 @@ public class GameManager : NetworkBehaviour
                 distribution[face]++;
             }
         }
+        
+        // —— DEBUG LOG ——
+        var sb = new System.Text.StringBuilder("[GetDiceDistribution] ");
+        foreach (var kv in distribution)
+            sb.Append($"{kv.Key}→{kv.Value}  ");
+        Debug.Log(sb.ToString());
 
         return distribution;
     }
