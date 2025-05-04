@@ -37,22 +37,6 @@ public class PlayerController : NetworkBehaviour
         GameManager.Instance.RegisterPlayer(this);
     }
 
-    private void Update() // Para testear si cambia de turno
-    {
-        if (HasInputAuthority && Input.GetKeyDown(KeyCode.Space))
-        {
-            if (myTurnId == GameManager.Instance.currentTurnId)
-            {
-                Debug.Log("[PlayerController] Space pressed — requesting next turn.");
-                GameManager.Instance.RequestNextTurn();
-            }
-            else
-            {
-                Debug.Log("[PlayerController] Not my turn. Ignoring space.");
-            }
-        }
-    }
-
     private void OnTurnIdChanged()
     {
         Debug.Log($"[PlayerController] My TurnID is: {myTurnId}");

@@ -174,8 +174,6 @@ public class GameManager : NetworkBehaviour
 
         if (Runner.LocalPlayer == loser.Object.InputAuthority)
             loser.LoseOneDie();
-        
-        //UIManager.Instance.UpdateDiceCounts(_players);
 
         RPC_StartGame(loser.Object.InputAuthority, loser.myTurnId);
     }
