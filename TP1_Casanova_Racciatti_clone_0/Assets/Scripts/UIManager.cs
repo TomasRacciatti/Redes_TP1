@@ -67,12 +67,13 @@ public class UIManager : MonoBehaviour
     {
         _playerListText.text = "";
         
-        //var ordered = players.OrderBy(p => p.myTurnId);
+        var ordered = players.OrderBy(p => p.myTurnId);
+        var sb = new System.Text.StringBuilder();
 
-        for (int i = 0; i < players.Count; i++)
-        {
-            _playerListText.text += $"Player{i + 1}: {players[i].RemainingDice}\n";
-        }
+        foreach (var player in ordered)
+            sb.AppendLine($"Player {player.myTurnId}: {player.RemainingDice}");
+        
+        _playerListText.text = sb.ToString();
     }
     
     public void UpdateRolledDice(List<int> rolledValues)

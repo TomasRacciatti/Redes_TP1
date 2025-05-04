@@ -8,16 +8,16 @@ using System.Linq;
 public class GameManager : NetworkBehaviour
 {
     public static GameManager Instance { get; private set; }
-    
+
     [Networked] public int currentClaimQuantity { get; set; }
     [Networked] public int currentClaimFace { get; set; }
-    
+
     public PlayerRef turnAuthority { get; set; }
     public int currentTurnId { get; set; }
-    
+
     private int _lastTurnID;
     private PlayerController LastPlayer => _players.First(p => p.myTurnId == _lastTurnID);
-    
+
     private List<PlayerController> _players = new List<PlayerController>();
 
     private bool _isFirstTurn;
@@ -67,7 +67,7 @@ public class GameManager : NetworkBehaviour
         yield return null;
 
         AssignTurnIDs();
-        
+
         var championRaw = _players
             .Min(p => p.Object.InputAuthority.RawEncoded);
 
@@ -77,9 +77,9 @@ public class GameManager : NetworkBehaviour
                 .OrderBy(p => p.Object.InputAuthority.RawEncoded)
                 .ToList();
 
-            int idx   = UnityEngine.Random.Range(0, alive.Count);
+            int idx = UnityEngine.Random.Range(0, alive.Count);
             var first = alive[idx];
-            
+
             RPC_StartGame(first.Object.InputAuthority, first.myTurnId);
         }
     }
@@ -92,24 +92,24 @@ public class GameManager : NetworkBehaviour
         currentClaimQuantity = 0;
         currentClaimFace = 1;
 
-        turnAuthority  = firstAuthority;
-        currentTurnId  = firstTurnId;
+        turnAuthority = firstAuthority;
+        currentTurnId = firstTurnId;
 
         foreach (var player in _players)
         {
             player.RollDice();
         }
-        
+
         UIManager.Instance.UpdateDiceCounts(_players);
         UpdateUI();
     }
-    
+
     [Rpc(RpcSources.All, RpcTargets.All)]
     private void RPC_StartGame(PlayerRef firstAuthority, int firstTurnId)
     {
         StartRound(firstAuthority, firstTurnId);
     }
-    
+
     public void RequestNextTurn()
     {
         if (Runner.LocalPlayer != turnAuthority)
@@ -117,7 +117,7 @@ public class GameManager : NetworkBehaviour
 
         RPC_AdvanceTurn();
     }
-    
+
     [Rpc(RpcSources.All, RpcTargets.All)]
     private void RPC_AdvanceTurn()
     {
@@ -128,13 +128,13 @@ public class GameManager : NetworkBehaviour
             .OrderBy(p => p.Object.InputAuthority.RawEncoded)
             .ToList();
 
-        int index    = alive.FindIndex(p => p.myTurnId == currentTurnId);
-        int nextIdx  = (index + 1) % alive.Count;
-        var next     = alive[nextIdx];
+        int index = alive.FindIndex(p => p.myTurnId == currentTurnId);
+        int nextIdx = (index + 1) % alive.Count;
+        var next = alive[nextIdx];
 
         turnAuthority = next.Object.InputAuthority;
         currentTurnId = next.myTurnId;
-        
+
         UpdateUI();
     }
 
@@ -144,14 +144,14 @@ public class GameManager : NetworkBehaviour
         UIManager.Instance.UpdateClaim(currentClaimQuantity, currentClaimFace);
         //UIManager.Instance.UpdateDiceCounts(_players);
     }
-    
+
     [Rpc(RpcSources.All, RpcTargets.All)]
     public void RPC_SetClaim(int quantity, int face)
     {
         currentClaimQuantity = quantity;
         currentClaimFace = face;
         _lastTurnID = currentTurnId;
-        
+
         RequestNextTurn();
     }
 
@@ -159,20 +159,24 @@ public class GameManager : NetworkBehaviour
     {
         RPC_ResolveBluff();
     }
-    
+
     [Rpc(RpcSources.All, RpcTargets.All)]
     private void RPC_ResolveBluff()
     {
         var dist = GetDiceDistribution();
         dist.TryGetValue(currentClaimFace, out int actualCount);
-        
-        var caller   = _players.First(p => p.myTurnId == currentTurnId);
+
+        var caller = _players.First(p => p.myTurnId == currentTurnId);
         var claimant = LastPlayer;
-        
+
         bool honest = actualCount >= currentClaimQuantity;
         var loser = honest ? caller : claimant;
-        loser.LoseOneDie();
+
+        if (Runner.LocalPlayer == loser.Object.InputAuthority)
+            loser.LoseOneDie();
         
+        //UIManager.Instance.UpdateDiceCounts(_players);
+
         RPC_StartGame(loser.Object.InputAuthority, loser.myTurnId);
     }
 
@@ -192,12 +196,13 @@ public class GameManager : NetworkBehaviour
                 distribution[face]++;
             }
         }
-        
-        // —— DEBUG LOG ——
+
+        /*// DEBUG para revisar proxies
         var sb = new System.Text.StringBuilder("[GetDiceDistribution] ");
         foreach (var kv in distribution)
             sb.Append($"{kv.Key}→{kv.Value}  ");
         Debug.Log(sb.ToString());
+        */
 
         return distribution;
     }

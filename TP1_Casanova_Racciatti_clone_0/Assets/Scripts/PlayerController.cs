@@ -8,7 +8,7 @@ public class PlayerController : NetworkBehaviour
 {
     [Header("Dice Settings")] [SerializeField]
     private int _maxDice = 5;
-
+    
     [Networked] public int RemainingDice { get; set; }
 
     public List<int> RolledDice { get; private set; } = new List<int>();
