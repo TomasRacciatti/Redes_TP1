@@ -399,7 +399,6 @@ MonoBehaviour:
   - {fileID: 1368197640}
   - {fileID: 656411894}
   _currentClaimDie: {fileID: 1601466226}
-  _raiseClaimDie: {fileID: 684304904}
   _claimAmountText: {fileID: 1711224852}
   _claimDie: {fileID: 1601466226}
   _turnOverlay: {fileID: 1351239376}
@@ -2795,8 +2794,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 819823b784ddad349b3782b01a36634f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _currentClaimQuantity: 0
-  _currentClaimFace: 0
+  _currentClaimQuantity: 1
+  _currentClaimFace: 1
 --- !u!4 &1348798407
 Transform:
   m_ObjectHideFlags: 0
