@@ -6,18 +6,18 @@ using UnityEngine;
 
 public class PlayerController : NetworkBehaviour
 {
-    [Header("Dice Settings")]
-    [SerializeField] private int _maxDice = 5;
+    [Header("Dice Settings")] [SerializeField]
+    private int _maxDice = 5;
 
     [Networked] public int RemainingDice { get; set; }
-    
+
     public List<int> RolledDice { get; private set; } = new List<int>();
 
     public bool IsAlive => RemainingDice > 0;
-    
-    [Networked, OnChangedRender(nameof(OnTurnIdChanged))] 
+
+    [Networked, OnChangedRender(nameof(OnTurnIdChanged))]
     public int myTurnId { get; set; }
-    
+
 
     public override void Spawned()
     {
@@ -25,7 +25,7 @@ public class PlayerController : NetworkBehaviour
         {
             RolledDice.Add(1);
         }
-        
+
         RemainingDice = _maxDice;
 
         if (HasInputAuthority)
@@ -33,9 +33,10 @@ public class PlayerController : NetworkBehaviour
             //Debug.Log($"[PlayerController] I am the local player. My NetworkObject ID: {Object.Id}");
             UIManager.Instance.SetPlayerReference(this);
         }
+
         GameManager.Instance.RegisterPlayer(this);
     }
-    
+
     private void Update() // Para testear si cambia de turno
     {
         if (HasInputAuthority && Input.GetKeyDown(KeyCode.Space))
@@ -68,17 +69,27 @@ public class PlayerController : NetworkBehaviour
         {
             RolledDice.Add(UnityEngine.Random.Range(1, 7));
         }
-        
+
         if (HasInputAuthority)
             UIManager.Instance.UpdateRolledDice(RolledDice);
     }
-    
+
     public void LoseOneDie()
     {
-        if (RemainingDice > 0)
-            RemainingDice--;
-        
+        if (RemainingDice <= 0)
+        {
+            return; // GAME OVER
+        }
+            
+
+        RemainingDice--;
+
         if (RolledDice.Count > RemainingDice)
             RolledDice.RemoveAt(RolledDice.Count - 1);
+
+        if (HasInputAuthority)
+        {
+            UIManager.Instance.UpdateRolledDice(RolledDice);
+        }
     }
 }

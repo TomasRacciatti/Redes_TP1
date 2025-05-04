@@ -76,7 +76,11 @@ public class UIManager : MonoBehaviour
     {
         for (int i = 0; i < _rolledDiceDisplays.Count; i++)
         {
-            if (i < rolledValues.Count)
+            bool slotActive = i < rolledValues.Count;
+            
+            _rolledDiceDisplays[i].gameObject.SetActive(slotActive);
+            
+            if (slotActive)
                 _rolledDiceDisplays[i].ShowValue(rolledValues[i]);
         }
     }
