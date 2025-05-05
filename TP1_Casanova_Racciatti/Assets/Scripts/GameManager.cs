@@ -180,32 +180,40 @@ public class GameManager : NetworkBehaviour
         bool honest = actualCount >= currentClaimQuantity;
         var loser = honest ? caller : claimant;
         
-        
+        /*
         loser.LoseOneDie();
 
         if (Runner.LocalPlayer != loser.Object.InputAuthority)
             loser.RPC_LoseOneDieLocal();
+            */
 
-        if (HasStateAuthority)
-            //StartCoroutine(RoundSummaryRoutine(loser.myTurnId, dist));
-
-        RPC_StartGame(loser.Object.InputAuthority, loser.myTurnId);
+        //if (HasStateAuthority)
+            StartCoroutine(RoundSummaryRoutineAndAdvance(loser.myTurnId));
     }
     
-    private IEnumerator RoundSummaryRoutine(int loserID, Dictionary<int, int> diceDistribution)
+    private IEnumerator RoundSummaryRoutineAndAdvance(int loserID)
     {
         int claimQty  = currentClaimQuantity;
         int claimFace = currentClaimFace;
         
-        RPC_ShowRoundSummary(diceDistribution, claimQty, claimFace, loserID);
+        RPC_ShowRoundSummary(claimQty, claimFace, loserID);
         
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(4f);
+        
+        var loser = _players.First(p => p.myTurnId == loserID);
+        loser.LoseOneDie();
+
+        if (Runner.LocalPlayer != loser.Object.InputAuthority)
+            loser.RPC_LoseOneDieLocal();
+        
+        RPC_StartGame(loser.Object.InputAuthority, loserID);
     }
     
-    //[Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    private void RPC_ShowRoundSummary(Dictionary<int, int> diceDistribution, int claimQty, int claimFace, int loserId)
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    private void RPC_ShowRoundSummary( int claimQty, int claimFace, int loserId)
     {
-        UIManager.Instance.ShowRoundSummary(diceDistribution, claimQty, claimFace, loserId);
+        var dist = GetDiceDistribution();
+        UIManager.Instance.ShowRoundSummary(dist, claimQty, claimFace, loserId);
     }
 
     private Dictionary<int, int> GetDiceDistribution()
