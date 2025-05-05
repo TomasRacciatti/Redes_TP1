@@ -28,6 +28,11 @@ public class UIManager : MonoBehaviour
     [Header("Players")]
     [SerializeField] private TextMeshProUGUI _playerListText;
     
+    [Header("Game Over")]
+    [SerializeField] private GameObject _winnerOverlay;
+    [SerializeField] private GameObject _loserOverlay;
+
+    
     private PlayerController _localPlayer;
 
     private void Awake()
@@ -87,5 +92,15 @@ public class UIManager : MonoBehaviour
             if (slotActive)
                 _rolledDiceDisplays[i].ShowValue(rolledValues[i]);
         }
+    }
+    
+    public void ShowDefeatOverlay()
+    {
+        _loserOverlay.SetActive(true);
+    }
+    
+    public void ShowVictoryOverlay()
+    {
+        _winnerOverlay.SetActive(true);
     }
 }
