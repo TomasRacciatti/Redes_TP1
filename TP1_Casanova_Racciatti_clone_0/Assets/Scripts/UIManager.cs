@@ -28,10 +28,16 @@ public class UIManager : MonoBehaviour
     [Header("Players")]
     [SerializeField] private TextMeshProUGUI _playerListText;
     
+    [Header("Round Information")]
+    [SerializeField] private GameObject _roundInfoPanel;
+    [SerializeField] private TextMeshProUGUI _diceDistributionText;
+    [SerializeField] private TextMeshProUGUI _claimText;
+    [SerializeField] private TextMeshProUGUI _loserText;
+    
     [Header("Game Over")]
     [SerializeField] private GameObject _winnerOverlay;
     [SerializeField] private GameObject _loserOverlay;
-
+    
     
     private PlayerController _localPlayer;
 
@@ -92,6 +98,28 @@ public class UIManager : MonoBehaviour
             if (slotActive)
                 _rolledDiceDisplays[i].ShowValue(rolledValues[i]);
         }
+    }
+    
+    public void ShowRoundSummary(Dictionary<int,int> distribution, int claimQuantity, int claimFace, int loserTurnId)
+    {
+        var sb = new System.Text.StringBuilder();
+        for (int dieFace = 1; dieFace <= 6; dieFace++)
+        {
+            distribution.TryGetValue(dieFace, out var count);
+            sb.AppendLine($"{dieFace}: {count}");
+        }
+        _diceDistributionText.text = sb.ToString();
+        
+        _claimText.text = $"Claim: {claimQuantity} → {claimFace}";
+        
+        _loserText.text = $"Player {loserTurnId} loses a die";
+
+        _roundInfoPanel.SetActive(true);
+    }
+    
+    public void HideRoundSummary()
+    {
+        _roundInfoPanel.SetActive(false);
     }
     
     public void ShowDefeatOverlay()

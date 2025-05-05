@@ -88,6 +88,8 @@ public class GameManager : NetworkBehaviour
 
     private void StartRound(PlayerRef firstAuthority, int firstTurnId)
     {
+        UIManager.Instance.HideRoundSummary();
+        
         Debug.Log("Round started!");
 
         _isFirstTurn = true;
@@ -184,7 +186,26 @@ public class GameManager : NetworkBehaviour
         if (Runner.LocalPlayer != loser.Object.InputAuthority)
             loser.RPC_LoseOneDieLocal();
 
+        if (HasStateAuthority)
+            //StartCoroutine(RoundSummaryRoutine(loser.myTurnId, dist));
+
         RPC_StartGame(loser.Object.InputAuthority, loser.myTurnId);
+    }
+    
+    private IEnumerator RoundSummaryRoutine(int loserID, Dictionary<int, int> diceDistribution)
+    {
+        int claimQty  = currentClaimQuantity;
+        int claimFace = currentClaimFace;
+        
+        RPC_ShowRoundSummary(diceDistribution, claimQty, claimFace, loserID);
+        
+        yield return new WaitForSeconds(3f);
+    }
+    
+    //[Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    private void RPC_ShowRoundSummary(Dictionary<int, int> diceDistribution, int claimQty, int claimFace, int loserId)
+    {
+        UIManager.Instance.ShowRoundSummary(diceDistribution, claimQty, claimFace, loserId);
     }
 
     private Dictionary<int, int> GetDiceDistribution()
@@ -213,6 +234,8 @@ public class GameManager : NetworkBehaviour
 
         return distribution;
     }
+
+    
     
     private void RemoveFromList(PlayerController player)
     {
