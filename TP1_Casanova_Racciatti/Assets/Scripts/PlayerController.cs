@@ -74,7 +74,7 @@ public class PlayerController : NetworkBehaviour
     {
         RemainingDice--;
         
-        if (RemainingDice <= 0)
+        if (RemainingDice <= 0 && HasInputAuthority)
         {
             GameManager.Instance.RPC_GameOver(Runner.LocalPlayer);
             //Runner.Despawn(Object);
