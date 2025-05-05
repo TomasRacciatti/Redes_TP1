@@ -162,7 +162,7 @@ public class GameManager : NetworkBehaviour
         RPC_ResolveBluff();
     }
 
-    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    [Rpc(RpcSources.All, RpcTargets.Proxies)]
     private void RPC_ResolveBluff()
     {
         var dist = GetDiceDistribution();
@@ -175,9 +175,9 @@ public class GameManager : NetworkBehaviour
         var loser = honest ? caller : claimant;
         
         
-        //loser.LoseOneDie();
+        loser.LoseOneDie();
 
-        //if (Runner.LocalPlayer != loser.Object.InputAuthority)
+        if (Runner.LocalPlayer != loser.Object.InputAuthority)
             loser.RPC_LoseOneDieLocal();
 
         RPC_StartGame(loser.Object.InputAuthority, loser.myTurnId);
