@@ -209,4 +209,38 @@ public class GameManager : NetworkBehaviour
 
         return distribution;
     }
+    
+    private void RemoveFromList(PlayerController player)
+    {
+        _players.Remove(player);
+    }
+    
+    [Rpc]
+    public void RPC_GameOver(PlayerRef client)
+    {
+        if (client == Runner.LocalPlayer)
+        {
+            UIManager.Instance.ShowDefeatOverlay();
+        }
+
+        var player = GetPlayerController(client);
+        RemoveFromList(player);
+
+        if (_players.Count == 1 && HasStateAuthority)
+        {
+            RPC_Win(_players[0]);
+        }
+    }
+    
+    [Rpc]
+    private void RPC_Win(PlayerController player)
+    {
+        UIManager.Instance.ShowVictoryOverlay();
+    }
+    
+    // Helper para obtener el PLayerController desde playerRef
+    private PlayerController GetPlayerController(PlayerRef client)
+    {
+        return _players.FirstOrDefault(p => p.Object.InputAuthority == client);
+    }
 }

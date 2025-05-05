@@ -72,13 +72,14 @@ public class PlayerController : NetworkBehaviour
 
     public void LoseOneDie()
     {
+        RemainingDice--;
+        
         if (RemainingDice <= 0)
         {
-            return; // GAME OVER
+            GameManager.Instance.RPC_GameOver(Runner.LocalPlayer);
+            //Runner.Despawn(Object);
+            return;
         }
-            
-
-        RemainingDice--;
 
         if (RolledDice.Count > RemainingDice)
             RolledDice.RemoveAt(RolledDice.Count - 1);
