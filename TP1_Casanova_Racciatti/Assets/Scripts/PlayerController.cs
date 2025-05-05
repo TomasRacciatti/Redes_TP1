@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Fusion;
 using UnityEngine;
+using System.Linq;
 
 public class PlayerController : NetworkBehaviour
 {
@@ -86,5 +87,12 @@ public class PlayerController : NetworkBehaviour
         {
             UIManager.Instance.UpdateRolledDice(RolledDice);
         }
+    }
+    
+    [Rpc(RpcSources.All, RpcTargets.InputAuthority)]
+    public void RPC_LoseOneDieLocal()
+    {
+        LoseOneDie();
+        UIManager.Instance.UpdateDiceCounts(GameManager.Instance.Players.ToList());
     }
 }

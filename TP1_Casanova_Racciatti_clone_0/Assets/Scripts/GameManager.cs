@@ -13,12 +13,14 @@ public class GameManager : NetworkBehaviour
     [Networked] public int currentClaimFace { get; set; }
 
     public PlayerRef turnAuthority { get; set; }
+
     public int currentTurnId { get; set; }
 
     private int _lastTurnID;
     private PlayerController LastPlayer => _players.First(p => p.myTurnId == _lastTurnID);
 
     private List<PlayerController> _players = new List<PlayerController>();
+    public IReadOnlyList<PlayerController> Players => _players;
 
     private bool _isFirstTurn;
     private bool _gameStarted;
@@ -160,7 +162,7 @@ public class GameManager : NetworkBehaviour
         RPC_ResolveBluff();
     }
 
-    [Rpc(RpcSources.All, RpcTargets.All)]
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
     private void RPC_ResolveBluff()
     {
         var dist = GetDiceDistribution();
@@ -171,9 +173,12 @@ public class GameManager : NetworkBehaviour
 
         bool honest = actualCount >= currentClaimQuantity;
         var loser = honest ? caller : claimant;
+        
+        
+        //loser.LoseOneDie();
 
-        if (Runner.LocalPlayer == loser.Object.InputAuthority)
-            loser.LoseOneDie();
+        //if (Runner.LocalPlayer != loser.Object.InputAuthority)
+            loser.RPC_LoseOneDieLocal();
 
         RPC_StartGame(loser.Object.InputAuthority, loser.myTurnId);
     }
