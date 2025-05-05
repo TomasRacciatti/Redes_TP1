@@ -198,7 +198,7 @@ public class GameManager : NetworkBehaviour
         
         RPC_ShowRoundSummary(claimQty, claimFace, loserID);
         
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(3.5f);
         
         var loser = _players.First(p => p.myTurnId == loserID);
         loser.LoseOneDie();
