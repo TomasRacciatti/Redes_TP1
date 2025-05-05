@@ -152,6 +152,7 @@ public class GameManager : NetworkBehaviour
     {
         currentClaimQuantity = quantity;
         currentClaimFace = face;
+        _isFirstTurn = false;
         _lastTurnID = currentTurnId;
 
         RequestNextTurn();
@@ -159,6 +160,9 @@ public class GameManager : NetworkBehaviour
 
     public void CallBluff() // Lo llamamos en el boton
     {
+        if (_isFirstTurn)
+            return;
+        
         RPC_ResolveBluff();
     }
 
