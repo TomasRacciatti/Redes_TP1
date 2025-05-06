@@ -21,6 +21,8 @@ public class ClaimController : MonoBehaviour
 
     private void Start()
     {
+        _amount = MinAmount;
+        _face   = MinFace;
         UpdateDisplay();
     }
 
