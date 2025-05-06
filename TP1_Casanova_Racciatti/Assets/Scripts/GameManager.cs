@@ -261,12 +261,12 @@ public class GameManager : NetworkBehaviour
 
         if (_players.Count == 1 && HasStateAuthority)
         {
-            RPC_Win(_players[0]);
+            RPC_Win(_players[0].Object.StateAuthority);
         }
     }
     
     [Rpc]
-    private void RPC_Win(PlayerController player)
+    private void RPC_Win([RpcTarget] PlayerRef client)
     {
         UIManager.Instance.ShowVictoryOverlay();
     }
