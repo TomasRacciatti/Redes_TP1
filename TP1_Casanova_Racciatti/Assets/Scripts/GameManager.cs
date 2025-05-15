@@ -210,7 +210,6 @@ public class GameManager : NetworkBehaviour
         UIManager.Instance.StartCoroutine(
             UIManager.Instance.ShowSummaryControlled(dist, delayBetween: 0.05f, callback: () =>
                 {
-                    var honest = dist[claimFace] >= claimQty;
                     RPC_ShowRoundSummary(claimQty, claimFace, loserID);
                 }
             )
