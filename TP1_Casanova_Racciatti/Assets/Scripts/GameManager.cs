@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Fusion;
 using System.Linq;
+using Unity.VisualScripting;
 
 public class GameManager : NetworkBehaviour
 {
@@ -66,6 +67,7 @@ public class GameManager : NetworkBehaviour
         var active = _players
             .Where(p => p.IsAlive)
             .OrderBy(p => p.Object.InputAuthority.RawEncoded);
+            //.ToList();
 
         foreach (var player in active)
         {
