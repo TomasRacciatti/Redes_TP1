@@ -202,6 +202,15 @@ public class GameManager : NetworkBehaviour
         bool honest = actualQty >= claimQuantity;
         return Tuple.Create(claimFace, actualQty, honest);
     }
+    
+    public List<Tuple<int, int>> GetPlayerDiceTuples()
+    {
+        return _players
+            .Where(p => p.IsAlive)
+            .OrderBy(p => p.myTurnId)
+            .Select(p => Tuple.Create(p.myTurnId, p.RemainingDice))
+            .ToList();
+    }
 
     private IEnumerator RoundSummaryRoutineAndAdvance(int loserID)
     {
