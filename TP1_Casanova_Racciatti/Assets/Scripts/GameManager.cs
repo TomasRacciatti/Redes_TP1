@@ -54,14 +54,28 @@ public class GameManager : NetworkBehaviour
 
     private void AssignTurnIDs()
     {
-        var ordered = _players
-            .Where(p => p.IsAlive)
-            .OrderBy(p => p.Object.InputAuthority.RawEncoded)
-            .ToList();
+        var ordered = ActivePlayers();
 
         int id = 1;
         foreach (var p in ordered)
             p.myTurnId = id++;
+    }
+
+    public IEnumerable<PlayerController> ActivePLayersGenerator()
+    {
+        var active = _players
+            .Where(p => p.IsAlive)
+            .OrderBy(p => p.Object.InputAuthority.RawEncoded);
+
+        foreach (var player in active)
+        {
+            yield return player;
+        }
+    }
+
+    public List<PlayerController> ActivePlayers()
+    {
+        return ActivePLayersGenerator().ToList();
     }
 
     private IEnumerator DelayedStart()
@@ -75,9 +89,7 @@ public class GameManager : NetworkBehaviour
 
         if (Runner.LocalPlayer.RawEncoded == championRaw)
         {
-            var alive = _players.Where(p => p.IsAlive)
-                .OrderBy(p => p.Object.InputAuthority.RawEncoded)
-                .ToList();
+            var alive = ActivePlayers();
 
             int idx = UnityEngine.Random.Range(0, alive.Count);
             var first = alive[idx];
@@ -127,10 +139,7 @@ public class GameManager : NetworkBehaviour
     {
         //Debug.Log($"[RPC_AdvanceTurn] invoked on {Runner.LocalPlayer} — old turn: {currentTurnId}");
 
-        var alive = _players
-            .Where(p => p.IsAlive)
-            .OrderBy(p => p.Object.InputAuthority.RawEncoded)
-            .ToList();
+        var alive = ActivePlayers();
 
         int index = alive.FindIndex(p => p.myTurnId == currentTurnId);
         int nextIdx = (index + 1) % alive.Count;
