@@ -61,7 +61,7 @@ public class GameManager : NetworkBehaviour
             p.myTurnId = id++;
     }
 
-    public IEnumerable<PlayerController> ActivePLayersGenerator()
+    private IEnumerable<PlayerController> ActivePlayersGenerator()
     {
         var active = _players
             .Where(p => p.IsAlive)
@@ -73,9 +73,9 @@ public class GameManager : NetworkBehaviour
         }
     }
 
-    public List<PlayerController> ActivePlayers()
+    private List<PlayerController> ActivePlayers()
     {
-        return ActivePLayersGenerator().ToList();
+        return ActivePlayersGenerator().ToList();
     }
 
     private IEnumerator DelayedStart()
@@ -204,8 +204,17 @@ public class GameManager : NetworkBehaviour
     {
         int claimQty  = currentClaimQuantity;
         int claimFace = currentClaimFace;
+        var dist = GetDiceDistribution();
         
-        RPC_ShowRoundSummary(claimQty, claimFace, loserID);
+        UIManager.Instance.StartCoroutine(
+            UIManager.Instance.ShowSummaryControlled(dist, delayBetween: 0.05f, callback: () => 
+                {
+                    var honest = dist[claimFace] >= claimQty;
+                    RPC_ShowRoundSummary(claimQty, claimFace, loserID);
+                }
+            )
+        );
+        
         
         yield return new WaitForSeconds(3.5f);
         

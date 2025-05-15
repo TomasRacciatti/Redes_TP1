@@ -121,6 +121,22 @@ public class UIManager : MonoBehaviour
         _roundInfoPanel.SetActive(true);
     }
 
+    public IEnumerator ShowSummaryControlled(Dictionary<int, int> dist, float delayBetween = 0.01f,
+        Action callback = null)
+    {
+        //_roundInfoPanel.SetActive(true);
+        _diceDistributionText.text = "";
+        
+        for (int face = 1; face <= 6; face++) {
+            dist.TryGetValue(face, out var cnt);
+            _diceDistributionText.text += $"{face} → {cnt}\n";
+            
+            yield return new WaitForSeconds(delayBetween);
+        }
+        
+        callback?.Invoke();
+    }
+
     public void HideRoundSummary()
     {
         _roundInfoPanel.SetActive(false);
