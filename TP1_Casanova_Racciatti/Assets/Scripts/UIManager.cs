@@ -99,24 +99,34 @@ public class UIManager : MonoBehaviour
 
     public void ShowRoundSummary(Dictionary<int, int> distribution, int claimQuantity, int claimFace, int loserTurnId)
     {
-        var sb = new System.Text.StringBuilder();
-        for (int dieFace = 1; dieFace <= 6; dieFace++)
-        {
-            distribution.TryGetValue(dieFace, out var count);
-            sb.AppendLine($"{dieFace} → {count}");
-        }
-
-        _diceDistributionText.text = sb.ToString();
-
-        _claimText.text = $"Claim: {claimFace} → {claimQuantity}";
-
         distribution.TryGetValue(claimFace, out var claimCount);
         var honest = claimCount >= claimQuantity;
+        
+        var summaryInfo = new
+        {
+            Rows = Enumerable.Range(1, 6)
+                .Select(face => new
+                {
+                    Face  = face,
+                    Count = distribution.TryGetValue(face, out var qty) ? qty : 0
+                }),
+            
+            ClaimText = $"Claim: {claimFace} → {claimQuantity}",
+            
+            LoserText = honest
+                ? $"Claim was honest. Player {loserTurnId} loses a die"
+                : $"Claim was a lie.     Player {loserTurnId} loses a die"
+        };
+        
+        var sb = new System.Text.StringBuilder();
+        
+        foreach (var row in summaryInfo.Rows)
+            sb.AppendLine($"{row.Face} → {row.Count}");
+        
+        _diceDistributionText.text = sb.ToString();
 
-        if (honest)
-            _loserText.text = $"Claim was honest. \nPlayer {loserTurnId} loses a die";
-        else
-            _loserText.text = $"Claim was a lie. \nPlayer {loserTurnId} loses a die";
+        _claimText.text = summaryInfo.ClaimText;
+        _loserText.text = summaryInfo.LoserText;
         
         _roundInfoPanel.SetActive(true);
     }
