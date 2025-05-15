@@ -73,15 +73,13 @@ public class UIManager : MonoBehaviour
 
     public void UpdateDiceCounts(List<PlayerController> players)
     {
-        _playerListText.text = "";
+        var lines = players
+            .Where(p => p.IsAlive)
+            .OrderBy(p => p.myTurnId)
+            .Select(p => $"Player {p.myTurnId}: {p.RemainingDice}")
+            .ToList();
 
-        var ordered = players.OrderBy(p => p.myTurnId);
-        var sb = new System.Text.StringBuilder();
-
-        foreach (var player in ordered)
-            sb.AppendLine($"Player {player.myTurnId}: {player.RemainingDice}");
-
-        _playerListText.text = sb.ToString();
+        _playerListText.text = string.Join("\n", lines);
     }
 
     public void UpdateRolledDice(List<int> rolledValues)
