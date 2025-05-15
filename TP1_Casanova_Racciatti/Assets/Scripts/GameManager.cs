@@ -234,6 +234,26 @@ public class GameManager : NetworkBehaviour
         UIManager.Instance.ShowRoundSummary(dist, claimQty, claimFace, loserId);
     }
 
+    
+    private Dictionary<int, int> GetDiceDistribution()
+    {
+        if (!_players.Any(player => player.IsAlive))
+            return new Dictionary<int,int>();
+        
+        return _players
+            .Where(p => p.IsAlive)
+            .SelectMany(p => p.RolledDice)
+            .Aggregate(new Dictionary<int, int>(), (dict, face) =>
+                {
+                    dict.TryAdd(face, 0);
+                    dict[face]++;
+                    return dict;
+                }
+            );
+    }
+    
+    /*
+    // Original sin Aggregate
     private Dictionary<int, int> GetDiceDistribution()
     {
         Dictionary<int, int> distribution = new();
@@ -251,15 +271,16 @@ public class GameManager : NetworkBehaviour
             }
         }
 
-        /*// DEBUG para revisar proxies
+        // DEBUG para revisar proxies
         var sb = new System.Text.StringBuilder("[GetDiceDistribution] ");
         foreach (var kv in distribution)
             sb.Append($"{kv.Key}→{kv.Value}  ");
         Debug.Log(sb.ToString());
-        */
+        
 
         return distribution;
     }
+    */
     
     private void RemoveFromList(PlayerController player)
     {
