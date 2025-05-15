@@ -101,7 +101,7 @@ public class GameManager : NetworkBehaviour
     private void StartRound(PlayerRef firstAuthority, int firstTurnId)
     {
         UIManager.Instance.HideRoundSummary();
-        
+
         Debug.Log("Round started!");
 
         _isFirstTurn = true;
@@ -173,73 +173,74 @@ public class GameManager : NetworkBehaviour
     {
         if (_isFirstTurn)
             return;
-        
+
         RPC_ResolveBluff();
     }
 
     [Rpc(RpcSources.All, RpcTargets.Proxies)]
     private void RPC_ResolveBluff()
     {
-        var dist = GetDiceDistribution();
-        dist.TryGetValue(currentClaimFace, out int actualCount);
+        var claimResult = CheckClaim(currentClaimFace, currentClaimQuantity);
+        
+        int face = claimResult.Item1;
+        int actualQty = claimResult.Item2;
+        bool honest = claimResult.Item3;
 
         var caller = _players.First(p => p.myTurnId == currentTurnId);
         var claimant = LastPlayer;
-
-        bool honest = actualCount >= currentClaimQuantity;
         var loser = honest ? caller : claimant;
-        
-        /*
-        loser.LoseOneDie();
 
-        if (Runner.LocalPlayer != loser.Object.InputAuthority)
-            loser.RPC_LoseOneDieLocal();
-            */
-
-        //if (HasStateAuthority)
-            StartCoroutine(RoundSummaryRoutineAndAdvance(loser.myTurnId));
+        StartCoroutine(RoundSummaryRoutineAndAdvance(loser.myTurnId));
     }
-    
+
+    private Tuple<int, int, bool> CheckClaim(int claimFace, int claimQuantity)
+    {
+        var dist = GetDiceDistribution();
+        dist.TryGetValue(claimFace, out int actualQty);
+        bool honest = actualQty >= claimQuantity;
+        return Tuple.Create(claimFace, actualQty, honest);
+    }
+
     private IEnumerator RoundSummaryRoutineAndAdvance(int loserID)
     {
-        int claimQty  = currentClaimQuantity;
+        int claimQty = currentClaimQuantity;
         int claimFace = currentClaimFace;
         var dist = GetDiceDistribution();
-        
+
         UIManager.Instance.StartCoroutine(
-            UIManager.Instance.ShowSummaryControlled(dist, delayBetween: 0.05f, callback: () => 
+            UIManager.Instance.ShowSummaryControlled(dist, delayBetween: 0.05f, callback: () =>
                 {
                     var honest = dist[claimFace] >= claimQty;
                     RPC_ShowRoundSummary(claimQty, claimFace, loserID);
                 }
             )
         );
-        
-        
+
+
         yield return new WaitForSeconds(3.5f);
-        
+
         var loser = _players.First(p => p.myTurnId == loserID);
         loser.LoseOneDie();
 
         if (Runner.LocalPlayer != loser.Object.InputAuthority)
             loser.RPC_LoseOneDieLocal();
-        
+
         RPC_StartGame(loser.Object.InputAuthority, loserID);
     }
-    
+
     [Rpc(RpcSources.All, RpcTargets.All)]
-    private void RPC_ShowRoundSummary( int claimQty, int claimFace, int loserId)
+    private void RPC_ShowRoundSummary(int claimQty, int claimFace, int loserId)
     {
         var dist = GetDiceDistribution();
         UIManager.Instance.ShowRoundSummary(dist, claimQty, claimFace, loserId);
     }
 
-    
+
     private Dictionary<int, int> GetDiceDistribution()
     {
         if (!_players.Any(player => player.IsAlive))
-            return new Dictionary<int,int>();
-        
+            return new Dictionary<int, int>();
+
         return _players
             .Where(p => p.IsAlive)
             .SelectMany(p => p.RolledDice)
@@ -251,7 +252,7 @@ public class GameManager : NetworkBehaviour
                 }
             );
     }
-    
+
     /*
     // Original sin Aggregate
     private Dictionary<int, int> GetDiceDistribution()
@@ -276,17 +277,17 @@ public class GameManager : NetworkBehaviour
         foreach (var kv in distribution)
             sb.Append($"{kv.Key}→{kv.Value}  ");
         Debug.Log(sb.ToString());
-        
+
 
         return distribution;
     }
     */
-    
+
     private void RemoveFromList(PlayerController player)
     {
         _players.Remove(player);
     }
-    
+
     [Rpc]
     public void RPC_GameOver(PlayerRef client)
     {
@@ -303,13 +304,13 @@ public class GameManager : NetworkBehaviour
             RPC_Win(_players[0].Object.StateAuthority);
         }
     }
-    
+
     [Rpc]
     private void RPC_Win([RpcTarget] PlayerRef client)
     {
         UIManager.Instance.ShowVictoryOverlay();
     }
-    
+
     // Helper para obtener el PLayerController desde playerRef
     private PlayerController GetPlayerController(PlayerRef client)
     {
